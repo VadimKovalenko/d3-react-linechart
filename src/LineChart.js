@@ -1,0 +1,137 @@
+import React, { Component } from 'react'
+import './App.css'
+import { scaleLinear } from 'd3-scale'
+import { max } from 'd3-array'
+import { select, selectAll } from 'd3-selection'
+import { timeParse }  from 'd3-time-format'
+import { scaleTime }  from 'd3-scale'
+import line from 'd3-shape/src/area'
+import extent from 'd3-array/src/extent'
+import { axisBottom, axisLeft } from 'd3-axis'
+import { tsv } from 'd3'
+import zoom from 'd3-zoom/src/zoom'
+import transform from 'd3-zoom/src/transform'
+import event from 'd3-selection/src/selection/on'
+
+var chartData = require('./data.tsv');
+
+class LineChart extends Component {
+   constructor(props){
+      super(props)
+      this.createLineChart = this.createLineChart.bind(this)
+   }
+   componentDidMount() {
+      this.createLineChart()
+   }
+   componentDidUpdate() {
+      this.createLineChart()
+   }
+   createLineChart() {
+      const node = this.node
+      const margin = {top: 20, right: 20, bottom: 30, left: 50}
+      const width = node.width.baseVal.value - margin.left - margin.right
+      const height = node.height.baseVal.value - margin.top - margin.bottom
+      const xAxis = axisBottom(x);
+      const yAxis = axisLeft(y);
+
+
+
+      const parseTime = timeParse("%d-%b-%y");
+
+      const x = scaleTime()
+      .rangeRound([0, width]);
+      const y = scaleLinear()
+      .rangeRound([height, 0]);
+
+      //Prepare function to parse data
+      const chartLine = line()
+      .x(function(d) { return x(d.date); })
+      .y(function(d) { return y(d.close); });
+
+
+   tsv(chartData, function(d) {
+      d.date = parseTime(d.date);
+      d.close = +d.close;
+      return d;
+      }, function(error, data) {
+      if (error) throw error;
+
+      //console.log(data)
+
+      x.domain(extent(data, function(d) { return d.date; }));
+      y.domain(extent(data, function(d) { return d.close; }));   
+
+      const gX = select(node).append("g")
+         .attr("transform", "translate(" + margin.left + "," + margin.top + ")").append("g")
+         .attr("transform", "translate(0," + height + ")")
+         .call(axisBottom(x));
+
+      const gY = select(node).append("g")
+         .attr("transform", "translate(" + margin.left + "," + margin.top + ")").append("g")
+         .attr("class", "axis axis--y")
+         .attr("y", 6)
+         .attr("dy", "0.71em")
+         .attr("text-anchor", "end")
+         .text("Price ($)")
+         .call(axisLeft(y));
+
+      //Zooming functionality
+      const zoomChart = zoom()
+      .scaleExtent([1, 5])
+      .extent([100, 100], [width-100, height-100])
+      .on("zoom", zoomed);
+
+      function zoomed() {
+         console.log(node)
+         //TODO remove
+         console.log("Zoom!")
+
+         select(node).selectAll(".charts")
+         .attr("transform", event.transform);
+         select(node).selectAll('.line').style("stroke-width", 2/transform.k);
+         gX.call(xAxis.scale(event.transform.rescaleX(x)));
+         gY.call(yAxis.scale(event.transform.rescaleY(y)));
+      }
+      /*/////////////*/
+
+      // X axis   
+      /*select(node)
+         .append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")").append("g")
+         .attr("transform", "translate(0," + height + ")")
+         .call(axisBottom(x))*/
+
+      // Y axis   
+      /*select(node)
+         .append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")").append("g")
+         .call(axisLeft(y))
+         .append("text")
+         .attr("fill", "#000")
+         .attr("transform", "rotate(-90)")
+         .attr("y", 6)
+         .attr("dy", "0.71em")
+         .attr("text-anchor", "end")
+         .text("Price ($)");*/
+
+      // Line chart   
+      select(node)
+         .call(zoomChart)
+         .append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")").attr("class", "charts")
+         .append("path")
+         .datum(data)
+         .attr("class", "line")
+         .attr("fill", "none")
+         .attr("stroke-linejoin", "round")
+         .attr("stroke-linecap", "round")
+         .attr("stroke", "steelblue")
+         .attr("stroke-width", 1.5)
+         .attr("d", chartLine)
+   })
+}
+
+render() {
+      return <svg ref={node => this.node = node}
+      width={800} height={500}>
+      </svg>
+   }
+}
+export default LineChart
