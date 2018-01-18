@@ -1,5 +1,7 @@
 import React, { Component } from 'react'
 import './App.css'
+import * as d3 from 'd3';
+import {event as currentEvent} from 'd3';
 import { scaleLinear } from 'd3-scale'
 import { max } from 'd3-array'
 import { select, selectAll } from 'd3-selection'
@@ -11,7 +13,6 @@ import { axisBottom, axisLeft } from 'd3-axis'
 import { tsv } from 'd3'
 import zoom from 'd3-zoom/src/zoom'
 import transform from 'd3-zoom/src/transform'
-import event from 'd3-selection/src/selection/on'
 
 var chartData = require('./data.tsv');
 
@@ -33,9 +34,6 @@ class LineChart extends Component {
       const height = node.height.baseVal.value - margin.top - margin.bottom
       const xAxis = axisBottom(x);
       const yAxis = axisLeft(y);
-
-
-
       const parseTime = timeParse("%d-%b-%y");
 
       const x = scaleTime()
@@ -56,8 +54,6 @@ class LineChart extends Component {
       }, function(error, data) {
       if (error) throw error;
 
-      //console.log(data)
-
       x.domain(extent(data, function(d) { return d.date; }));
       y.domain(extent(data, function(d) { return d.close; }));   
 
@@ -77,40 +73,18 @@ class LineChart extends Component {
 
       //Zooming functionality
       const zoomChart = zoom()
-      .scaleExtent([1, 5])
-      .extent([100, 100], [width-100, height-100])
+      .scaleExtent([1, 50])
+      .extent([[100, 100], [width-100, height-100]])
       .on("zoom", zoomed);
 
       function zoomed() {
-         console.log(node)
-         //TODO remove
-         console.log("Zoom!")
-
          select(node).selectAll(".charts")
-         .attr("transform", event.transform);
-         select(node).selectAll('.line').style("stroke-width", 2/transform.k);
-         gX.call(xAxis.scale(event.transform.rescaleX(x)));
-         gY.call(yAxis.scale(event.transform.rescaleY(y)));
+         .attr("transform", d3.event.transform);
+         select(node).selectAll('.line').style("stroke-width", 2/d3.event.transform.k);
+         gX.call(xAxis.scale(d3.event.transform.rescaleX(x)));
+         gY.call(yAxis.scale(d3.event.transform.rescaleY(y)));
       }
       /*/////////////*/
-
-      // X axis   
-      /*select(node)
-         .append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")").append("g")
-         .attr("transform", "translate(0," + height + ")")
-         .call(axisBottom(x))*/
-
-      // Y axis   
-      /*select(node)
-         .append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")").append("g")
-         .call(axisLeft(y))
-         .append("text")
-         .attr("fill", "#000")
-         .attr("transform", "rotate(-90)")
-         .attr("y", 6)
-         .attr("dy", "0.71em")
-         .attr("text-anchor", "end")
-         .text("Price ($)");*/
 
       // Line chart   
       select(node)
