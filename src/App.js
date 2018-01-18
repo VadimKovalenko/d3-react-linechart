@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import './App.css'
 import BarChart from './BarChart'
 import LineChart from './LineChart'
+import PlotLineChart from './PlotLineChart'
 
 class App extends Component {
    render() {
@@ -12,7 +13,7 @@ class App extends Component {
       </div>
       <div>
       <BarChart data={[5,10,1,3]} size={[500,500]} />
-      <LineChart data={''} size={[500,500]} />
+      <LineChart data={''} size={[500,800]} />
       </div>
       </div>
    )
