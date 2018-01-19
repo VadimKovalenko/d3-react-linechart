@@ -4,6 +4,31 @@ body {
   font-family: sans-serif;
 }
 
+/*Simple zoom*/
 .axis--x path {
   display: none;
+}
+
+/*Plot zoom*/
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.y.axis path {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.brush .extent {
+  stroke: #fff;
+  fill-opacity: .125;
+  shape-rendering: crispEdges;
+}
+
+.plot-line {
+  fill: none;
 }
