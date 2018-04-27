@@ -6,7 +6,7 @@ body {
 
 /*Simple zoom*/
 .axis--x path {
-  display: none;
+  *display: none;
 }
 
 /*Plot zoom*/

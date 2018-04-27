@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import './App.css'
 import * as d3 from 'd3';
-import {event as currentEvent} from 'd3';
 import { scaleLinear } from 'd3-scale'
 import { max } from 'd3-array'
 import { select, selectAll } from 'd3-selection'
@@ -10,6 +9,7 @@ import { scaleTime }  from 'd3-scale'
 import line from 'd3-shape/src/area'
 import extent from 'd3-array/src/extent'
 import { axisBottom, axisLeft } from 'd3-axis'
+import {event as currentEvent} from 'd3-selection';
 import { csv } from 'd3'
 import zoom from 'd3-zoom/src/zoom'
 import transform from 'd3-zoom/src/transform'
