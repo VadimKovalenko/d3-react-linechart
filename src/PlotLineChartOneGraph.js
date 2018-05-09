@@ -2,24 +2,33 @@ import React, { Component } from 'react'
 import './App.css'
 import * as d3 from 'd3';
 // example - http://blockbuilder.org/EfratVil/92f894ac0ba265192411e73f633a3e2f
-let chartData2 = require('./CIMIS_Station_125.csv');
+let chartData = require('./export-TxGrowth.csv');
 
 class PlotLineChartFixed extends Component {
     constructor(props){
-        super(props)
+        super(props);
         this.createLineChart = this.createLineChart.bind(this)
     }
+
     componentDidMount() {
-        this.createLineChart()
+        this.createLineChart(this.props.currency)
     }
-    componentDidUpdate() {
-        this.createLineChart()
+
+    componentWillReceiveProps(nextProps) {
+        // we have to handle the DOM ourselves now
+        if (nextProps.currency !== this.props.currency) {
+            this.createLineChart(nextProps.currency)
+        }
     }
-    createLineChart() {
+
+    createLineChart(currency) {
+
+        console.log("@@", this.props.currency)
+
         const node = this.node;
         let svg = d3.select(node),
-            margin = {top: 20, right: 20, bottom: 110, left: 40},
-            margin2 = {top: 430, right: 20, bottom: 30, left: 40},
+            margin = {top: 20, right: 20, bottom: 110, left: 60},
+            margin2 = {top: 430, right: 20, bottom: 30, left: 60},
             width = +svg.attr("width") - margin.left - margin.right,
             height = +svg.attr("height") - margin.top - margin.bottom,
             height2 = +svg.attr("height") - margin2.top - margin2.bottom;
@@ -47,11 +56,11 @@ class PlotLineChartFixed extends Component {
 
         let line = d3.line()
             .x(function (d) { return x(d.Date); })
-            .y(function (d) { return y(d.Air_Temp); });
+            .y(function (d) { return y(d[currency]); });
 
         let line2 = d3.line()
             .x(function (d) { return x2(d.Date); })
-            .y(function (d) { return y2(d.Air_Temp); });
+            .y(function (d) { return y2(d[currency]); });
 
         let clip = svg.append("defs").append("svg:clipPath")
             .attr("id", "clip")
@@ -77,11 +86,11 @@ class PlotLineChartFixed extends Component {
             .attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
 
 
-        d3.csv(chartData2, type, function (error, data) {
+        d3.csv(chartData, type, function (error, data) {
             if (error) throw error;
 
             x.domain(d3.extent(data, function(d) { return d.Date; }));
-            y.domain([0, d3.max(data, function (d) { return d.Air_Temp; })]);
+            y.domain([0, d3.max(data, function (d) { return d[currency]; })]);
             x2.domain(x.domain());
             y2.domain(y.domain());
 
@@ -152,8 +161,8 @@ class PlotLineChartFixed extends Component {
         }
 
         function type(d) {
-            d.Date = parseDate(d.Date);
-            d.Air_Temp = +d.Air_Temp;
+            d.Date = new Date(d.Date);
+            d[currency] = +d[currency];
             return d;
         }
     }
