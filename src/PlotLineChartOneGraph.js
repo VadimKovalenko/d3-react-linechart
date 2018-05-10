@@ -10,22 +10,28 @@ class PlotLineChartFixed extends Component {
         this.createLineChart = this.createLineChart.bind(this)
     }
 
+    removePreviousLineChart() {
+        const chart = document.getElementById('chart');
+        while(chart.hasChildNodes()) {
+            chart.removeChild(chart.lastChild);
+        }
+    }
+
     componentDidMount() {
         this.createLineChart(this.props.currency)
     }
 
     componentWillReceiveProps(nextProps) {
-        // we have to handle the DOM ourselves now
         if (nextProps.currency !== this.props.currency) {
+            this.removePreviousLineChart();
             this.createLineChart(nextProps.currency)
         }
     }
 
     createLineChart(currency) {
 
-        console.log("@@", this.props.currency)
-
         const node = this.node;
+
         let svg = d3.select(node),
             margin = {top: 20, right: 20, bottom: 110, left: 60},
             margin2 = {top: 430, right: 20, bottom: 30, left: 60},
@@ -33,7 +39,7 @@ class PlotLineChartFixed extends Component {
             height = +svg.attr("height") - margin.top - margin.bottom,
             height2 = +svg.attr("height") - margin2.top - margin2.bottom;
 
-        let parseDate = d3.timeParse("%m/%d/%Y %H:%M");
+        //let parseDate = d3.timeParse("%m/%d/%Y %H:%M");
 
         let x = d3.scaleTime().range([0, width]),
             x2 = d3.scaleTime().range([0, width]),
@@ -168,9 +174,11 @@ class PlotLineChartFixed extends Component {
     }
 
     render() {
-        return <svg ref={node => this.node = node}
+        return (
+            <svg id="chart" ref={node => this.node = node}
                     width={960} height={500}>
-        </svg>
+            </svg>
+        )
     }
 }
 export default PlotLineChartFixed
